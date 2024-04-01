@@ -4,6 +4,7 @@ A simple implementaion of a telegram bot for music recognition
 # Dependencies
 - Java
 - Telegram Bot API
+- Junit
 - Redis
 - MongoDB
 - Heroku
