@@ -1,6 +1,6 @@
 package com.masonord.harmonyhound.controller;
 
-import com.masonord.harmonyhound.TelegramBot;
+import com.masonord.harmonyhound.telegram.TelegramBot;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
