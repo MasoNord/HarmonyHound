@@ -12,7 +12,7 @@ import java.util.ResourceBundle;
 @Setter
 public class LanguageUtil {
     private final Map<String, String> languages = new HashMap<>();
-    private Locale language = Locale.forLanguageTag("en-US");
+    private static Locale language = Locale.forLanguageTag("en-US");
 
     {
         languages.put("\uD83C\uDDFA\uD83C\uDDF8" + " " + "English", "en-US");
@@ -27,5 +27,13 @@ public class LanguageUtil {
     public String getProperty(String key, String tag) {
         ResourceBundle bundle = ResourceBundle.getBundle("messages", Locale.forLanguageTag(tag));
         return bundle.getString(key);
+    }
+
+    public void setLanguage(String tag) {
+        language = Locale.forLanguageTag(tag);
+    }
+
+    public Locale getLanguage() {
+        return language;
     }
 }

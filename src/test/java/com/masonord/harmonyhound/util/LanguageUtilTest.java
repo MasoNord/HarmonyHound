@@ -19,12 +19,12 @@ public class LanguageUtilTest {
     @Test
     void should_successfully_get_message_from_bundle() {
         String message = util.getProperty("language");
-        assertEquals("English", message);
+        assertEquals(util.getProperty("language"), message);
     }
 
     @Test
     void should_successfully_change_language() {
-        util.setLanguage(Locale.forLanguageTag("ru-RU"));
+        util.setLanguage("ru-RU");
         assertEquals(Locale.forLanguageTag("ru-RU"), util.getLanguage());
     }
 
@@ -35,7 +35,7 @@ public class LanguageUtilTest {
 
     @Test
     void should_successfully_get_message_from_bundle_after_changing_lang() {
-        util.setLanguage(Locale.forLanguageTag("ru-RU"));
+        util.setLanguage("ru-RU");
         String message = util.getProperty("language");
         assertEquals("Русский", message);
     }

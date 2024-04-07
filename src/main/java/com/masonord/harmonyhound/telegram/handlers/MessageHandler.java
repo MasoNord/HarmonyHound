@@ -16,8 +16,6 @@ public class MessageHandler {
 
     public BotApiMethod<?> answerMessage(Message message) throws Exception {
         String chatId = message.getChatId().toString();
-        String inputText = message.getText();
-
-        return CommandFactory.INSTANCE.createCommand(inputText, chatId).execute();
+        return CommandFactory.INSTANCE.createCommand(message, chatId).execute();
     }
 }

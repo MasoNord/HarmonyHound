@@ -14,7 +14,7 @@ public class KeyboardMaker {
         this.languageUtil = languageUtil;
     }
 
-    private ReplyKeyboardMarkup getMainMenuKeyBoard() {
+    public ReplyKeyboardMarkup getMainMenuKeyBoard() {
         return null;
     }
 

@@ -2,6 +2,7 @@ package com.masonord.harmonyhound.telegram.commands;
 import com.masonord.harmonyhound.exception.InvalidCommand;
 import com.masonord.harmonyhound.util.LanguageUtil;
 import org.hibernate.sql.Update;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 public class CommandFactory {
     public static CommandFactory INSTANCE = new CommandFactory();
@@ -11,18 +12,17 @@ public class CommandFactory {
         this.languageUtil = new LanguageUtil();
     }
 
-    public Command createCommand(String name, String chatId) throws Exception {
-        Command command = null;
+    public Command createCommand(Message message, String chatId) throws Exception {
+        Command command;
 
-        if (name.equals("/start")) {
+        if (message.getText().equals("/start")) {
             command = new StartCommand(chatId);
-        }else if(languageUtil.getLanguages().containsKey(name)) {
-            command = new ChangeLangCommand(chatId, name);
+        }else if(languageUtil.getLanguages().containsKey(message.getText())) {
+            command = new ChangeLangCommand(chatId, message.getText());
         }else {
             command = new PongCommand(chatId);
 //            throw new InvalidCommand(languageUtil.getProperty("command.not.found"));
         }
-
         return command;
     }
 }

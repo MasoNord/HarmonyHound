@@ -15,7 +15,7 @@ public class PongCommand implements Command{
 
     @Override
     public BotApiMethod<?> execute() {
-        SendMessage sendMessage = new SendMessage(chatId, "PONG");
+        SendMessage sendMessage = new SendMessage(chatId, languageUtil.getProperty("pong"));
         sendMessage.enableMarkdown(true);
         return sendMessage;
     }
