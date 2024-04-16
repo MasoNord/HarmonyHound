@@ -15,6 +15,7 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 @Setter
 public class TelegramBot extends SpringWebhookBot {
     private MessageHandler messageHandler;
+    private MediaHandler mediaHandler;
     private CallbackQueryHandler callbackQueryHandler;
     private String botPath;
     private String botUsername;
@@ -22,10 +23,12 @@ public class TelegramBot extends SpringWebhookBot {
 
     public TelegramBot(SetWebhook setWebhook,
                        MessageHandler messageHandler,
-                       CallbackQueryHandler callbackQueryHandler) {
+                       CallbackQueryHandler callbackQueryHandler,
+                       MediaHandler mediaHandler) {
         super(setWebhook);
         this.callbackQueryHandler = callbackQueryHandler;
         this.messageHandler = messageHandler;
+        this.mediaHandler = mediaHandler;
     }
 
     @Override
@@ -56,6 +59,8 @@ public class TelegramBot extends SpringWebhookBot {
             Message message = update.getMessage();
             if (message.hasText()) {
                 return messageHandler.answerMessage(message);
+            }else if (message.hasVoice() || message.hasAudio() || message.hasVideo()) {
+                return mediaHandler.answerMessage(message);
             }
         }
         return null;

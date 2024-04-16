@@ -1,6 +1,7 @@
 package com.masonord.harmonyhound.config;
 
 import com.masonord.harmonyhound.telegram.TelegramBot;
+import com.masonord.harmonyhound.telegram.handlers.MediaHandler;
 import com.masonord.harmonyhound.telegram.handlers.CallbackQueryHandler;
 import com.masonord.harmonyhound.telegram.handlers.MessageHandler;
 import org.springframework.context.annotation.Bean;
@@ -24,11 +25,16 @@ public class AppConfig {
     @Bean
     public TelegramBot springWebhookBot(SetWebhook setWebhook,
                                         MessageHandler messageHandler,
-                                        CallbackQueryHandler callbackQueryHandler) {
-        TelegramBot bot = new TelegramBot(setWebhook, messageHandler, callbackQueryHandler);
+                                        CallbackQueryHandler callbackQueryHandler,
+                                        MediaHandler mediaHandler) {
+        TelegramBot bot = new TelegramBot(setWebhook, messageHandler, callbackQueryHandler, mediaHandler);
         bot.setBotPath(botConfig.getBotToken());
         bot.setBotUsername(botConfig.getBotName());
         bot.setBotPath(botConfig.getWebHookPath());
         return bot;
+    }
+
+    public TelegramConfig getTelegramConfig() {
+        return botConfig;
     }
 }
