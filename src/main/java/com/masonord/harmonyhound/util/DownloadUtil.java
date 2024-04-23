@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.io.*;
@@ -19,6 +20,9 @@ import java.io.*;
 public class DownloadUtil {
     private final ObjectMapper objectMapper;
     private final String botToken;
+
+    @Autowired
+    FileSystemUtil fileSystemUtil;
 
     public DownloadUtil(@Value("${telegram.bot-token}") String botToken) {
         this.objectMapper = new ObjectMapper();
@@ -30,12 +34,12 @@ public class DownloadUtil {
         String destinationToDownload = "downloaded-media/chat_" + chatId + "/"
                 + filePathResponse.getResult().getFile_path().split("/")[1];
 
-        createNewFolder("downloaded-media/chat_" + chatId);
+        fileSystemUtil.createNewFolder("downloaded-media/chat_" + chatId);
 
         String url = "https://api.telegram.org/file/bot" + botToken + "/" + filePathResponse.getResult().getFile_path();
         HttpGet httpGet = new HttpGet(url);
 
-        createNewFile(destinationToDownload);
+        fileSystemUtil.createNewFile(destinationToDownload);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -52,19 +56,13 @@ public class DownloadUtil {
                     }
                 }
             }
-
         } catch (IOException e) {
             // TODO: logging
         }
-
         return filePathResponse;
     }
 
-    /*
-    *
-    *
-    *
-    * */
+    // TODO: add java doc
 
     private FilePathResponse getFilePath(String fieldId) {
         String url = "https://api.telegram.org/bot" + botToken + "/getFile?file_id=" + fieldId;
@@ -90,40 +88,7 @@ public class DownloadUtil {
             response =  objectMapper.readValue(result.toString(), FilePathResponse.class);
         }catch(JsonProcessingException e) {
             // TODO: logging
-            System.out.println(e.getMessage());
         }
-
         return response;
     }
-
-    private void createNewFile(String destination) {
-        try {
-            File file = new File(destination);
-            boolean fileCreated = file.createNewFile();
-            if (!fileCreated) {
-                throw new IOException("Unable to create a file at specified path");
-            }
-        }catch (IOException e) {
-            // TODO: logging
-        }
-    }
-
-    private void createNewFolder(String destination) {
-        try {
-            File file = new File(destination);
-            boolean folderCreated = true;
-
-            if (!file.exists()) {
-                folderCreated = file.mkdirs();
-            }
-
-            if (!folderCreated) {
-                throw new IOException("Unable to create a folder at specified path");
-            }
-        }catch(IOException e) {
-            // TODO: logging
-        }
-    }
-
-
 }

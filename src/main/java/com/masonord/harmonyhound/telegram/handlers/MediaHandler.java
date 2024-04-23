@@ -1,53 +1,44 @@
 package com.masonord.harmonyhound.telegram.handlers;
 
+import com.masonord.harmonyhound.response.FilePathResponse;
+import com.masonord.harmonyhound.response.GetAudioRecognitionResult;
+import com.masonord.harmonyhound.service.RecognizeMediaService;
+import com.masonord.harmonyhound.util.DownloadUtil;
 import com.masonord.harmonyhound.util.MediaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class MediaHandler {
+    @Autowired
+    private DownloadUtil downloadUtil;
 
     @Autowired
-    MediaUtil mediaUtil;
+    private RecognizeMediaService recognizeMediaService;
 
-    private final ConcurrentHashMap<String, Queue<String>> songsToRecognize;
-
-    public MediaHandler() {
-        songsToRecognize = new ConcurrentHashMap<>();
-    }
+    @Autowired
+    private MediaUtil mediaUtil;
 
     public BotApiMethod<?> answerMessage(Message message) {
         String chatId = message.getChatId().toString();
-        addNewChatId(chatId);
 
+        FilePathResponse response;
         if (message.hasVideo()) {
-            mediaUtil.download(message.getVideo().getFileId());
+            response =  downloadUtil.download(message.getVideo().getFileId(), chatId);
         }else if (message.hasAudio()) {
-            mediaUtil.download(message.getAudio().getFileId());
+            response = downloadUtil.download(message.getAudio().getFileId(), chatId);
         }else {
-            mediaUtil.download(message.getVoice().getFileId());
+            response = downloadUtil.download(message.getVoice().getFileId(), chatId);
         }
 
-
-
-
+        GetAudioRecognitionResult result = recognizeMediaService.recognizeAudio(chatId, response);
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
         return sendMessage;
-    }
-
-    private void addNewChatId(String chatId) {
-        if (!songsToRecognize.contains(chatId)) {
-            Queue<String> songs = new ArrayDeque<>();
-            songsToRecognize.put(chatId, songs);
-        }
     }
 }
