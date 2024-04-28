@@ -57,19 +57,22 @@ public class RecognizeMediaService {
         params.add(new BasicNameValuePair("token", audioTokenResponse.getToken()));
 
         String value = "";
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new UrlEncodedFormEntity(params));
-            HttpResponse httpResponse= client.execute(httpPost);
-            value = EntityUtils.toString(httpResponse.getEntity());
-        }catch (IOException e) {
-            // TODO: logging
-        }
-
         GetAudioRecognitionResult response = null;
-        try {
-            response = objectMapper.readValue(value, GetAudioRecognitionResult.class);
-        }catch (JsonProcessingException e) {
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            int n = 1;
+            while (++n < 100) {
+                Thread.sleep(1);
+                HttpPost httpPost = new HttpPost(url);
+                httpPost.setEntity(new UrlEncodedFormEntity(params));
+                HttpResponse httpResponse= client.execute(httpPost);
+                response = objectMapper.readValue(
+                        EntityUtils.toString(httpResponse.getEntity()),
+                        GetAudioRecognitionResult.class
+                );
+                if (!response.getResult().equals("wait")) break;
+            }
+        }catch (IOException | InterruptedException e) {
             // TODO: logging
         }
         return response;

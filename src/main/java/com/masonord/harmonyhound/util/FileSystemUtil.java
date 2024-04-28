@@ -42,7 +42,7 @@ public class FileSystemUtil {
             File file = new File(destination);
             boolean fileDeleted = file.delete();
             if (!fileDeleted) {
-                throw new IOException("Unable to delete a file from a storage disk");
+                throw new IOException("Unable to delete a file from at specified path");
             }
         }catch(IOException e) {
             // TODO: logging

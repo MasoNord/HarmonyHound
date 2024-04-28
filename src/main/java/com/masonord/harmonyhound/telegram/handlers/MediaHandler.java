@@ -39,6 +39,7 @@ public class MediaHandler {
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
+        sendMessage.setText(result.getData().get(0).getTracks().get(0).get(0));
         return sendMessage;
     }
 }
