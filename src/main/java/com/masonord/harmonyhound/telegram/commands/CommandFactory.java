@@ -14,10 +14,10 @@ public class CommandFactory {
     public Command createCommand(Message message, String chatId) throws Exception {
         Command command;
 
-        if (message.hasAudio() || message.hasVideo()) {
-            command = new RecognizeCommand(chatId, message);
-        }else if (message.getText().equals("/start")) {
+        if (message.getText().equals("/start")) {
             command = new StartCommand(chatId);
+        }else if (message.getText().equals("/help")) {
+            command = new HelpCommand(chatId);
         }else if(languageUtil.getLanguages().containsKey(message.getText())) {
             command = new ChangeLangCommand(chatId, message.getText());
         }else {

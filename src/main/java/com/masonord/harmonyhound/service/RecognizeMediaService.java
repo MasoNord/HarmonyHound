@@ -52,15 +52,15 @@ public class RecognizeMediaService {
         GetAudioTokenResponse audioTokenResponse = getAudioToken(chatId, filePathResponse);
 
         List<NameValuePair> params = new ArrayList<>();
+
         params.add(new BasicNameValuePair("apikey", apikey));
         params.add(new BasicNameValuePair("action", "get_result"));
         params.add(new BasicNameValuePair("token", audioTokenResponse.getToken()));
 
-        String value = "";
         GetAudioRecognitionResult response = null;
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            int n = 1;
+            int n = 0;
             while (++n < 100) {
                 Thread.sleep(1);
                 HttpPost httpPost = new HttpPost(url);
