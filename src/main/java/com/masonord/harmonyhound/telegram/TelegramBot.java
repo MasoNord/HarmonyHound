@@ -25,6 +25,7 @@ public class TelegramBot extends SpringWebhookBot {
                        MessageHandler messageHandler,
                        CallbackQueryHandler callbackQueryHandler,
                        MediaHandler mediaHandler) {
+
         super(setWebhook);
         this.callbackQueryHandler = callbackQueryHandler;
         this.messageHandler = messageHandler;
@@ -38,7 +39,7 @@ public class TelegramBot extends SpringWebhookBot {
         }catch (IllegalAccessError e) {
             return new SendMessage(update.getMessage().getChatId().toString(), "Illegal Access Error");
         }catch(Exception e) {
-            return new SendMessage(update.getMessage().getChatId().toString(), "Exception");
+            return new SendMessage(update.getMessage().getChatId().toString(), e.getMessage());
         }
     }
     @Override
