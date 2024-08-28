@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, MongoAutoConfiguration.class})
+@SpringBootApplication()
 public class HarmonyHoundApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(HarmonyHoundApplication.class, args);
