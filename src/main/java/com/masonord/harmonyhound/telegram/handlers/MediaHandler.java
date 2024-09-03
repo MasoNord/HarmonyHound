@@ -26,6 +26,7 @@ public class MediaHandler {
         String chatId = message.getChatId().toString();
 
         FilePathResponse response;
+
         if (message.hasVideo()) {
             response =  downloadUtil.download(message.getVideo().getFileId(), chatId);
         }else if (message.hasAudio()) {

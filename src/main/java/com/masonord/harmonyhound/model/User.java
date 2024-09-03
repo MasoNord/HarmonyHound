@@ -14,9 +14,9 @@ import lombok.ToString;
 @Entity
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private Long chatId;
+    private Long userId;
     private String firstName;
+    private String lastName;
     private String username;
+    private Long apiCalls;
 }
