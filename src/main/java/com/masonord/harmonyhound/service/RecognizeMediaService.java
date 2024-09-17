@@ -1,39 +1,26 @@
 package com.masonord.harmonyhound.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masonord.harmonyhound.response.FilePathResponse;
-import com.masonord.harmonyhound.response.GetAudioRecognitionResult;
-import com.masonord.harmonyhound.response.GetAudioTokenResponse;
 import com.masonord.harmonyhound.util.FileSystemUtil;
 import com.masonord.harmonyhound.util.MediaUtil;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+// TODO: add java doc
 
 @Component
 public class RecognizeMediaService {
-
     private final String apikey;
-    private final ObjectMapper objectMapper;
     private final String url;
+    private final String rapidapi;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     private MediaUtil mediaUtil;
@@ -41,74 +28,24 @@ public class RecognizeMediaService {
     @Autowired
     private FileSystemUtil fileSystemUtil;
 
-    public RecognizeMediaService(@Value("${audiotag.api-key}") String apikey,
-                                 @Value("${audiotag-url}") String url) {
+    public RecognizeMediaService(@Value("${shazam.api-key}") String apikey,
+                                 @Value("${shazam.url}") String url,
+                                 @Value("${rapid.api}") String rapidapi) {
         this.apikey = apikey;
         this.url = url;
+        this.rapidapi = rapidapi;
         this.objectMapper = new ObjectMapper();
     }
 
-    public GetAudioRecognitionResult recognizeAudio(String chatId, FilePathResponse filePathResponse) {
-        GetAudioTokenResponse audioTokenResponse = getAudioToken(chatId, filePathResponse);
-
-        List<NameValuePair> params = new ArrayList<>();
-
-        params.add(new BasicNameValuePair("apikey", apikey));
-        params.add(new BasicNameValuePair("action", "get_result"));
-        params.add(new BasicNameValuePair("token", audioTokenResponse.getToken()));
-
-        GetAudioRecognitionResult response = null;
-
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            int n = 0;
-            while (++n < 100) {
-                Thread.sleep(1);
-                HttpPost httpPost = new HttpPost(url);
-                httpPost.setEntity(new UrlEncodedFormEntity(params));
-                HttpResponse httpResponse= client.execute(httpPost);
-                response = objectMapper.readValue(
-                        EntityUtils.toString(httpResponse.getEntity()),
-                        GetAudioRecognitionResult.class
-                );
-                if (!response.getResult().equals("wait")) break;
-            }
-        }catch (IOException | InterruptedException e) {
-            // TODO: logging
-        }
-        return response;
-    }
-
-    private GetAudioTokenResponse getAudioToken(String chatId, FilePathResponse filePathResponse) {
-        String filename = mediaUtil.convertAudioToWavFormat(chatId, filePathResponse);
-
-        File file = new File(filename);
-        HttpPost httpPost = new HttpPost(url);
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        builder.addTextBody("apikey", apikey, ContentType.TEXT_PLAIN);
-        builder.addTextBody("action", "identify", ContentType.TEXT_PLAIN);
-        builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, filename);
-
-        HttpEntity entity = builder.build();
-        httpPost.setEntity(entity);
-
-        String value = "";
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            HttpResponse response = client.execute(httpPost);
-            value = EntityUtils.toString(response.getEntity());
-        }catch (IOException e) {
-            //TODO: logging
-        }
-
-        GetAudioTokenResponse response = null;
-        try {
-            response = objectMapper.readValue(value, GetAudioTokenResponse.class);
-        }catch (JsonProcessingException e) {
-            // TODO: logging
-        }
-
-        fileSystemUtil.deleteFile(filename);
-        return response;
+    public String recognizeAudio(String chatId, FilePathResponse filePathResponse) throws IOException, InterruptedException, URISyntaxException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://shazam-song-recognition-api.p.rapidapi.com/recognize/url?url=https://drive.google.com/file/d/1PpRMf-N864zVwIePXDprDWrh5lmfdN9O/view?usp=drive_link"))
+                .header("x-rapidapi-key", "7ef5347179msh324744296b9e5e8p1e55e2jsnbc0c396235f4")
+                .header("x-rapidapi-host", "shazam-song-recognition-api.p.rapidapi.com")
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println(response.body());
+        return response.body();
     }
 }
