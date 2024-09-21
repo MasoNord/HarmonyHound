@@ -2,7 +2,6 @@ package com.masonord.harmonyhound.telegram;
 
 import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.service.UserService;
-import com.masonord.harmonyhound.service.UserServiceImpl;
 import com.masonord.harmonyhound.telegram.handlers.CallbackQueryHandler;
 import com.masonord.harmonyhound.telegram.handlers.MediaHandler;
 import com.masonord.harmonyhound.telegram.handlers.MessageHandler;

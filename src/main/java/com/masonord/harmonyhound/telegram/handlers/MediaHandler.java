@@ -1,7 +1,8 @@
 package com.masonord.harmonyhound.telegram.handlers;
 
+import com.google.api.services.drive.model.File;
 import com.masonord.harmonyhound.response.FilePathResponse;
-import com.masonord.harmonyhound.response.GetAudioRecognitionResult;
+import com.masonord.harmonyhound.service.GoogleDriveService;
 import com.masonord.harmonyhound.service.RecognizeMediaService;
 import com.masonord.harmonyhound.util.DownloadUtil;
 import com.masonord.harmonyhound.util.MediaUtil;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 
 @Component
 public class MediaHandler {
@@ -22,7 +26,10 @@ public class MediaHandler {
     @Autowired
     private MediaUtil mediaUtil;
 
-    public BotApiMethod<?> answerMessage(Message message) {
+    @Autowired
+    private GoogleDriveService googleDriveService;
+
+    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException {
         String chatId = message.getChatId().toString();
 
         FilePathResponse response;
@@ -35,12 +42,16 @@ public class MediaHandler {
             response = downloadUtil.download(message.getVoice().getFileId(), chatId);
         }
 
-        GetAudioRecognitionResult result = recognizeMediaService.recognizeAudio(chatId, response);
+        File fileLink = googleDriveService.uploadFile(response, chatId);
+        String result = recognizeMediaService.recognizeAudio(fileLink.getWebViewLink());
+        googleDriveService.deleteFile(fileLink.getId());
+
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
-        sendMessage.setText(result.getData().get(0).getTracks().get(0).get(0));
+        sendMessage.setText(result);
+
         return sendMessage;
     }
 }
