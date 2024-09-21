@@ -29,14 +29,14 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
     private static final String APPLICATION_NAME = "Web client 1";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "/home/masonord/credentials";
-    private static final Set<String> SCOPES = Collections.singleton(DriveScopes.DRIVE_FILE);
+    private static final Set<String> SCOPES = Collections.singleton(DriveScopes.DRIVE);
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
     @Autowired
     private FileSystemUtil fileSystemUtil;
 
     @Override
-    public String uploadFile(FilePathResponse filePathResponse, String chatId) throws GeneralSecurityException, IOException {
+    public File uploadFile(FilePathResponse filePathResponse, String chatId) throws GeneralSecurityException, IOException {
         NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
@@ -54,18 +54,27 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
             Permission permission = new Permission();
             permission.setType("anyone");
             permission.setRole("reader");
-
             service.permissions().create(file.getId(), permission).execute();
             fileLink = service.files().get(file.getId())
                     .setFields("id, webViewLink, webContentLink")
                     .execute();
         }catch (GoogleJsonResponseException e) {
-            System.out.println("Unable to upload file: " + e.getDetails());
+            System.out.println("Something went wrong" + e.getDetails());
         }
 
         fileSystemUtil.deleteFile("downloaded-media/chat_" + chatId + "/"
                 + filePathResponse.getResult().getFile_path().split("/")[1]);
-        return fileLink.getWebViewLink();
+
+        return fileLink;
+    }
+
+    @Override
+    public void deleteFile(String fileId) throws GeneralSecurityException, IOException {
+        NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential(HTTP_TRANSPORT))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+        service.files().delete(fileId).execute();
     }
 
     private Credential getCredential(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
