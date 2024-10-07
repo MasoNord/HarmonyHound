@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 public class CommandFactory {
     public static CommandFactory INSTANCE = new CommandFactory();
     private final LanguageUtil languageUtil;
+
     public CommandFactory() {
         this.languageUtil = new LanguageUtil();
     }
@@ -20,7 +21,7 @@ public class CommandFactory {
             command = new StartCommand(chatId);
         }else if (message.getText().equals("/help")) {
             command = new HelpCommand(chatId);
-        }else if(languageUtil.getLanguages().containsKey(message.getText())) {
+        }else if(languageUtil.getLanguages().containsKey(message.getText()) || message.getText().equals(languageUtil.getProperty("change.language.text"))) {
             command = new ChangeLangCommand(chatId, message.getText());
         }else if(message.getText().equals("/info")) {
             command = new MyDataCommand(user);

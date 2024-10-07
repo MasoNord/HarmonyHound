@@ -14,10 +14,11 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 @Getter
 @Setter
 public class TelegramBot extends SpringWebhookBot {
-    private String botPath;
-    private String botUsername;
     @Value("${telegram.bot-token}")
     private String botToken;
+
+    private String botPath;
+    private String botUsername;
 
     private TelegramFacade telegramFacade;
 

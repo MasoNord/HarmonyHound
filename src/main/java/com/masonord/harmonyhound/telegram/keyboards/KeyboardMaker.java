@@ -4,6 +4,9 @@ import com.masonord.harmonyhound.util.LanguageUtil;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class KeyboardMaker {
@@ -15,7 +18,9 @@ public class KeyboardMaker {
     }
 
     public ReplyKeyboardMarkup getMainMenuKeyBoard() {
-        return null;
+        return getKeyboard(new String[][] {
+                {languageUtil.getProperty("change.language.text")}
+        });
     }
 
     public ReplyKeyboardMarkup getLanguageMenuKeyBoard() {
@@ -29,8 +34,27 @@ public class KeyboardMaker {
         replyKeyboardMarkup.setKeyboard(keyboard);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
 
         return replyKeyboardMarkup;
     }
+
+    private ReplyKeyboardMarkup getKeyboard(String[][] strings) {
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+
+        for (String[] ss : strings) {
+            KeyboardRow row = new KeyboardRow();
+            row.addAll(Arrays.asList(ss));
+            rowList.add(row);
+        }
+
+        keyboardMarkup.setKeyboard(rowList);
+        keyboardMarkup.setSelective(true);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setOneTimeKeyboard(true);
+
+        return keyboardMarkup;
+    }
+
 }
