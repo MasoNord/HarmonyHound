@@ -1,7 +1,7 @@
 package com.masonord.harmonyhound.service;
 
 import com.google.api.services.drive.model.File;
-import com.masonord.harmonyhound.response.FilePathResponse;
+import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 

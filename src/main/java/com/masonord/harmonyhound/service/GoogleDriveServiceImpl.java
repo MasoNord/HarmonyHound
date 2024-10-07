@@ -16,7 +16,7 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Permission;
-import com.masonord.harmonyhound.response.FilePathResponse;
+import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import com.masonord.harmonyhound.util.FileSystemUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,8 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
     private static final String APPLICATION_NAME = "Web client 1";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "/home/masonord/credentials";
-    private static final Set<String> SCOPES = Collections.singleton(DriveScopes.DRIVE);
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
+    private static final Set<String> SCOPES = Collections.singleton(DriveScopes.DRIVE);
 
     @Autowired
     private FileSystemUtil fileSystemUtil;
@@ -78,7 +78,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
     }
 
     private Credential getCredential(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        InputStream in = GoogleDriveServiceImpl.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        InputStream in = GoogleDriveServiceImpl.class.getClassLoader().getResource(CREDENTIALS_FILE_PATH).openStream();
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
@@ -91,8 +91,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
                 .build();
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8080).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-        return credential;
+        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
 }
