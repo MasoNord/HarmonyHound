@@ -1,4 +1,4 @@
-package com.masonord.harmonyhound.response;
+package com.masonord.harmonyhound.response.telegram;
 
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package com.masonord.harmonyhound.util;
 
-import com.masonord.harmonyhound.response.FilePathResponse;
+import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
@@ -23,7 +23,6 @@ public class MediaUtil {
         }catch (IOException | InterruptedException e) {
             // TODO: logging
         }
-
         return outFilename;
     }
 }
