@@ -2,7 +2,7 @@ package com.masonord.harmonyhound.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.masonord.harmonyhound.response.FilePathResponse;
+import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

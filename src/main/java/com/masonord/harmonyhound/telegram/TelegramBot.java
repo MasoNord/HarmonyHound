@@ -2,7 +2,10 @@ package com.masonord.harmonyhound.telegram;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -11,9 +14,12 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 @Getter
 @Setter
 public class TelegramBot extends SpringWebhookBot {
+    @Value("${telegram.bot-token}")
+    private String botToken;
+
     private String botPath;
     private String botUsername;
-    private String botToken;
+
     private TelegramFacade telegramFacade;
 
     public TelegramBot(SetWebhook setWebhook, TelegramFacade telegramFacade) {
@@ -24,6 +30,10 @@ public class TelegramBot extends SpringWebhookBot {
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         try {
+            SendChatAction sendChatAction = new SendChatAction();
+            sendChatAction.setAction(ActionType.TYPING);
+            sendChatAction.setChatId(String.valueOf(update.getMessage().getChatId()));
+            execute(sendChatAction);
             return telegramFacade.handleUpdate(update);
         }catch (IllegalAccessError e) {
             return new SendMessage(update.getMessage().getChatId().toString(), "Illegal Access Error");

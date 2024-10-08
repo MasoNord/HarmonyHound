@@ -21,10 +21,17 @@ public class ChangeLangCommand implements Command {
 
     @Override
     public BotApiMethod<?> execute() {
-        languageUtil.setLanguage(languageUtil.getLanguages().get(lang));
-        SendMessage sendMessage = new SendMessage(chatId, languageUtil.getProperty("change.language"));
+        SendMessage sendMessage;
+
+        if (languageUtil.getLanguages().containsKey(lang)) {
+            languageUtil.setLanguage(languageUtil.getLanguages().get(lang));
+            sendMessage = new SendMessage(chatId, languageUtil.getProperty("change.language"));
+            sendMessage.setReplyMarkup(keyboardMaker.getMainMenuKeyBoard());
+        }else {
+            sendMessage = new SendMessage(chatId, languageUtil.getProperty("start"));
+            sendMessage.setReplyMarkup(keyboardMaker.getLanguageMenuKeyBoard());
+        }
         sendMessage.enableMarkdown(true);
-        sendMessage.setReplyMarkup(keyboardMaker.getMainMenuKeyBoard());
         return sendMessage;
     }
 }
