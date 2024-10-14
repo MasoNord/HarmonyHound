@@ -3,26 +3,45 @@ package com.masonord.harmonyhound.util;
 import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 
 @Component
 public class MediaUtil {
+    private final FileSystemUtil fileSystemUtil;
 
     @Autowired
-    private FileSystemUtil fileSystemUtil;
+    MediaUtil(FileSystemUtil fileSystemUtil) {
+        this.fileSystemUtil = fileSystemUtil;
+    }
 
-    public String convertAudioToWavFormat(String chatId, FilePathResponse filePathResponse) {
-        String fileName = filePathResponse.getResult().getFile_path().split("/")[1];
-        String inFilename = "downloaded-media/chat_" + chatId + "/" + fileName;
-        String outFilename = "downloaded-media/chat_" + chatId + "/" + fileName.split("\\.(?=[^\\.]+$)")[0] + ".wav";
-        String cmd = "ffmpeg -i " + inFilename + " -ar 8000 -ac 1 -vn " + outFilename;
+    public void convertFileToWav(String inFilename, String outFilename) {
+        String cmd = "ffmpeg -i " + inFilename + " " + outFilename;
         try {
+            if (fileSystemUtil.fileExists(outFilename)) {
+                throw new FileAlreadyExistsException("the output file is already exists");
+            }
             Process p = Runtime.getRuntime().exec(cmd);
             p.waitFor();
-            fileSystemUtil.deleteFile(inFilename);
         }catch (IOException | InterruptedException e) {
             // TODO: logging
         }
-        return outFilename;
+    }
+
+    public double getAudioDuration(String destination) {
+        try {
+            File file = new File(destination);
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+            AudioFormat format = audioInputStream.getFormat();
+            long frames = audioInputStream.getFrameLength();
+            return ((frames + 0.0) / format.getFrameRate());
+        } catch (UnsupportedAudioFileException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

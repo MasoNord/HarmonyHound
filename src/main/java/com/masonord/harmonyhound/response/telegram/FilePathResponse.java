@@ -1,5 +1,4 @@
 package com.masonord.harmonyhound.response.telegram;
-
 import lombok.*;
 
 @Data

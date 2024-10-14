@@ -1,10 +1,12 @@
 package com.masonord.harmonyhound.telegram;
 
+import com.masonord.harmonyhound.exception.UnsupportedMediaType;
 import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.service.UserService;
 import com.masonord.harmonyhound.telegram.handlers.CallbackQueryHandler;
 import com.masonord.harmonyhound.telegram.handlers.MediaHandler;
 import com.masonord.harmonyhound.telegram.handlers.MessageHandler;
+import com.masonord.harmonyhound.util.LanguageUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ public class TelegramFacade {
     private final MessageHandler messageHandler;
     private final MediaHandler mediaHandler;
     private final CallbackQueryHandler callbackQueryHandler;
+    private final LanguageUtil languageUtil;
 
     @Autowired
     private UserService userService;
@@ -38,6 +41,7 @@ public class TelegramFacade {
         this.messageHandler = messageHandler;
         this.mediaHandler = mediaHandler;
         this.callbackQueryHandler = callbackQueryHandler;
+        this.languageUtil = new LanguageUtil();
     }
 
     public BotApiMethod<?> handleUpdate(Update update) throws Exception {
@@ -57,11 +61,12 @@ public class TelegramFacade {
 
             if (message.hasText()) {
                 return messageHandler.answerMessage(message, user);
-            }else if (message.hasVoice() || message.hasAudio() || message.hasVideo()) {
+            }else if (message.hasVoice() || message.hasAudio() || message.hasVideo() || message.hasVideoNote()) {
                 return mediaHandler.answerMessage(message);
+            }else {
+                throw new UnsupportedMediaType(languageUtil.getProperty("unsupported.media.type"));
             }
         }
-        return null;
     }
 
 }

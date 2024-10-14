@@ -2,6 +2,7 @@ package com.masonord.harmonyhound.telegram.handlers;
 
 import com.google.api.services.drive.model.File;
 import com.google.gson.Gson;
+import com.masonord.harmonyhound.exception.UnsupportedMediaType;
 import com.masonord.harmonyhound.response.rapidapi.Sections;
 import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import com.masonord.harmonyhound.response.rapidapi.RecognizedSongResponse;
@@ -9,6 +10,7 @@ import com.masonord.harmonyhound.response.videoresponse.YoutubeResponse;
 import com.masonord.harmonyhound.service.GoogleDriveService;
 import com.masonord.harmonyhound.service.RecognizeMediaService;
 import com.masonord.harmonyhound.util.DownloadUtil;
+import com.masonord.harmonyhound.util.FileSystemUtil;
 import com.masonord.harmonyhound.util.MediaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,33 +39,45 @@ public class MediaHandler {
     @Autowired
     private GoogleDriveService googleDriveService;
 
+    @Autowired
+    private FileSystemUtil fileSystemUtil;
+
     private final Gson gson;
 
     public MediaHandler() {
         this.gson = new Gson();
     }
 
-    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException {
+    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, UnsupportedMediaType {
         String chatId = message.getChatId().toString();
-
+        String in, out;
         FilePathResponse response;
 
         if (message.hasVideo()) {
-            response =  downloadUtil.download(message.getVideo().getFileId(), chatId);
+            response = downloadUtil.download(message.getVideo().getFileId(), chatId);
         }else if (message.hasAudio()) {
             response = downloadUtil.download(message.getAudio().getFileId(), chatId);
-        }else {
+        }else if (message.hasVoice()) {
             response = downloadUtil.download(message.getVoice().getFileId(), chatId);
+        }else {
+            response = downloadUtil.download(message.getVideoNote().getFileId(), chatId);
         }
+        in = "downloaded-media/chat_" + chatId + "/" + response.getResult().getFile_path().split("/")[1];
+        out = "downloaded-media/chat_" + chatId + "/" + response.getResult().getFile_path().split("/")[1].split("\\.")[0] + ".wav";
 
-        File fileLink = googleDriveService.uploadFile(response, chatId);
+        mediaUtil.convertFileToWav(in, out);
+        File fileLink = googleDriveService.uploadFile(out, chatId);
         RecognizedSongResponse recognizedAudio = recognizeMediaService.recognizeAudio(fileLink.getWebViewLink());
         googleDriveService.deleteFile(fileLink.getId());
+        fileSystemUtil.deleteFile(in);
+        fileSystemUtil.deleteFile(out);
+
 
         YoutubeResponse youtubeResponse = null;
         for (Sections s : recognizedAudio.getTrack().getSections()) {
             if (s.getYoutubeurl() != null) {
                 youtubeResponse = getYoutubeResponse(s.getYoutubeurl());
+                break;
             }
         }
 

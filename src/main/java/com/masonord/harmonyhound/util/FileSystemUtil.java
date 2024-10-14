@@ -47,4 +47,9 @@ public class FileSystemUtil {
             // TODO: logging
         }
     }
+
+    public boolean fileExists(String destination) {
+        File file = new File(destination);
+        return file.exists();
+    }
 }
