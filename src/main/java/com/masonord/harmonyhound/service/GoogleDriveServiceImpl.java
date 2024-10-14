@@ -16,9 +16,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Permission;
-import com.masonord.harmonyhound.response.telegram.FilePathResponse;
-import com.masonord.harmonyhound.util.FileSystemUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -32,20 +29,16 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
     private static final Set<String> SCOPES = Collections.singleton(DriveScopes.DRIVE);
 
-    @Autowired
-    private FileSystemUtil fileSystemUtil;
-
     @Override
-    public File uploadFile(FilePathResponse filePathResponse, String chatId) throws GeneralSecurityException, IOException {
+    public File uploadFile(String filePath, String chatId) throws GeneralSecurityException, IOException {
         NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         File fileMetadata = new File();
-        fileMetadata.setName(filePathResponse.getResult().getFile_path().split("/")[1]);
-        java.io.File filePath = new java.io.File("downloaded-media/chat_" + chatId + "/"
-                + filePathResponse.getResult().getFile_path().split("/")[1]);
-        FileContent mediaContent = new FileContent("audio/ogg", filePath);
+        fileMetadata.setName(filePath.split("/")[2]);
+        java.io.File mainFile= new java.io.File(filePath);
+        FileContent mediaContent = new FileContent("audio/wav", mainFile);
         File fileLink = null;
         try {
             File file = service.files().create(fileMetadata, mediaContent)
@@ -61,10 +54,6 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
         }catch (GoogleJsonResponseException e) {
             System.out.println("Something went wrong" + e.getDetails());
         }
-
-        fileSystemUtil.deleteFile("downloaded-media/chat_" + chatId + "/"
-                + filePathResponse.getResult().getFile_path().split("/")[1]);
-
         return fileLink;
     }
 

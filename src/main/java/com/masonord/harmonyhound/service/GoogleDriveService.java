@@ -6,6 +6,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 public interface GoogleDriveService {
-    File uploadFile(FilePathResponse filePathResponse, String chatIde) throws IOException, GeneralSecurityException;
+    File uploadFile(String filePath, String chatIde) throws IOException, GeneralSecurityException;
     void deleteFile(String fileId) throws GeneralSecurityException, IOException;
 }
