@@ -3,11 +3,12 @@ package com.masonord.harmonyhound.telegram.handlers;
 import com.google.api.services.drive.model.File;
 import com.google.gson.Gson;
 import com.masonord.harmonyhound.exception.FileTooShortException;
-import com.masonord.harmonyhound.exception.UnsupportedMediaType;
+import com.masonord.harmonyhound.exception.SongNotFoundException;
+import com.masonord.harmonyhound.response.rapidapi.Metadata;
+import com.masonord.harmonyhound.response.rapidapi.Metapages;
 import com.masonord.harmonyhound.response.rapidapi.Sections;
 import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import com.masonord.harmonyhound.response.rapidapi.RecognizedSongResponse;
-import com.masonord.harmonyhound.response.videoresponse.YoutubeResponse;
 import com.masonord.harmonyhound.service.GoogleDriveService;
 import com.masonord.harmonyhound.service.RecognizeMediaService;
 import com.masonord.harmonyhound.util.DownloadUtil;
@@ -19,18 +20,16 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 @Component
 public class MediaHandler {
+    private final double MIN_LENGTH = 3.00;
+    private final double MAX_LENGTH = 10.00;
+
     @Autowired
     private DownloadUtil downloadUtil;
 
@@ -55,7 +54,7 @@ public class MediaHandler {
         this.languageUtil = new LanguageUtil();
     }
 
-    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, UnsupportedMediaType, FileTooShortException {
+    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, FileTooShortException, SongNotFoundException {
         String chatId = message.getChatId().toString();
         String in, out;
         FilePathResponse response;
@@ -76,8 +75,12 @@ public class MediaHandler {
 
         double fileLength = mediaUtil.getAudioDuration(out);
 
-        if (fileLength < 5.00) {
+        if (fileLength < MIN_LENGTH) {
             throw new FileTooShortException(languageUtil.getProperty("file.too.short"));
+        }
+
+        if (fileLength > MAX_LENGTH) {
+
         }
 
         File fileLink = googleDriveService.uploadFile(out, chatId);
@@ -86,44 +89,32 @@ public class MediaHandler {
         fileSystemUtil.deleteFile(in);
         fileSystemUtil.deleteFile(out);
 
-
-        YoutubeResponse youtubeResponse = null;
-        for (Sections s : recognizedAudio.getTrack().getSections()) {
-            if (s.getYoutubeurl() != null) {
-                youtubeResponse = getYoutubeResponse(s.getYoutubeurl());
-                break;
-            }
+        if (recognizedAudio.getTrack() == null || recognizedAudio.getMatches().isEmpty()) {
+            throw new SongNotFoundException(languageUtil.getProperty("song.not.found"));
         }
 
-        return getSendMessage(chatId, recognizedAudio, youtubeResponse);
+        return getSendMessage(chatId, recognizedAudio);
     }
 
-    private SendMessage getSendMessage(String chatId, RecognizedSongResponse recognizedAudio, YoutubeResponse youtubeResponse) {
+    private SendMessage getSendMessage(String chatId, RecognizedSongResponse recognizedAudio) {
         SendMessage sendMessage = new SendMessage();
+        List<Sections> sections = recognizedAudio.getTrack().getSections();
+        List<Metapages> metapages = (sections.get(0).getMetapages().isEmpty() ? null : sections.get(0).getMetapages());
+        List<Metadata> metadata = (sections.get(0).getMetadata().isEmpty() ? null : sections.get(0).getMetadata());
+        String genre = recognizedAudio.getTrack().getGenres().getPrimary();
 
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
         sendMessage.setText(
                 "Accuracy match - " + (recognizedAudio.getLocation().getAccuracy() * 10000) + "%\n\n" +
                 "*" + recognizedAudio.getTrack().getTitle() + "*"+ "\n\n" +
-                "*Album: *" + recognizedAudio.getTrack().getSections().get(0).getMetadata().get(0).getText() + "\n" +
-                "*Label: *" + recognizedAudio.getTrack().getSections().get(0).getMetadata().get(1).getText() + "\n" +
-                "*Artist: *" + recognizedAudio.getTrack().getSections().get(0).getMetapages().get(0).getCaption() + "\n" +
-                "*Genre: *" + recognizedAudio.getTrack().getGenres().getPrimary() + "\n\n" +
-                "*Released: *" + recognizedAudio.getTrack().getSections().get(0).getMetadata().get(2).getText() + "\n\n" +
-                "*Shazam: *" + recognizedAudio.getTrack().getUrl() + "\n" +
-                (youtubeResponse == null ? "" : "*Youtube: *" + youtubeResponse.getActions().get(0).getUri()) + "\n"
+                (metadata == null ? "" : "Album: " + metadata.get(0).getText() + '\n') +
+                (metadata == null ? "" : "Label: " + metadata.get(1).getText() + '\n') +
+                (metapages == null ? "" : "Artist: " + metapages.get(0).getCaption() + '\n') +
+                (genre == null ? "" : "Genre: " + genre + '\n') +
+                (metadata == null ? "" : "Released: " + metadata.get(2).getText()  + '\n') +
+                "*Shazam: *" + recognizedAudio.getTrack().getUrl() + "\n"
         );
         return sendMessage;
-    }
-
-    private YoutubeResponse getYoutubeResponse(String httpLink) throws URISyntaxException, IOException, InterruptedException {
-        URI uri = new URI(httpLink);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
-                .method("GET", HttpRequest.BodyPublishers.noBody())
-                .build();
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        return gson.fromJson(response.body(), YoutubeResponse.class);
     }
 }
