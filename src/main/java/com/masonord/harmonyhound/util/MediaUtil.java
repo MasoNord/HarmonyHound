@@ -1,6 +1,5 @@
 package com.masonord.harmonyhound.util;
 
-import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import javax.sound.sampled.AudioFormat;

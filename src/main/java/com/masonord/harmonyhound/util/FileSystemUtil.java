@@ -3,6 +3,9 @@ package com.masonord.harmonyhound.util;
 import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+
+// TODO: change usage from classic IO to NIO to boost performance
 
 @Component
 public class FileSystemUtil {
@@ -51,5 +54,12 @@ public class FileSystemUtil {
     public boolean fileExists(String destination) {
         File file = new File(destination);
         return file.exists();
+    }
+
+    public void renameFile(String oldName, String newName) throws FileAlreadyExistsException {
+        File oldFile = new File("oldName");
+        File newFile = new File(newName);
+        if (newFile.exists()) throw new FileAlreadyExistsException("The file already exists");
+        oldFile.renameTo(newFile);
     }
 }

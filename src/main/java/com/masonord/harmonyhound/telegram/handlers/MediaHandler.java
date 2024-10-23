@@ -2,6 +2,7 @@ package com.masonord.harmonyhound.telegram.handlers;
 
 import com.google.api.services.drive.model.File;
 import com.google.gson.Gson;
+import com.masonord.harmonyhound.exception.ExceedFileDurationException;
 import com.masonord.harmonyhound.exception.ExceedFileSizeLimitException;
 import com.masonord.harmonyhound.exception.FileTooShortException;
 import com.masonord.harmonyhound.exception.SongNotFoundException;
@@ -55,7 +56,7 @@ public class MediaHandler {
         this.languageUtil = new LanguageUtil();
     }
 
-    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, FileTooShortException, SongNotFoundException, ExceedFileSizeLimitException {
+    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, SongNotFoundException, ExceedFileSizeLimitException {
         String chatId = message.getChatId().toString();
         String in, out;
         FilePathResponse response;
@@ -69,6 +70,7 @@ public class MediaHandler {
         }else {
             response = downloadUtil.download(message.getVideoNote().getFileId(), chatId);
         }
+        
         in = "downloaded-media/chat_" + chatId + "/" + response.getResult().getFile_path().split("/")[1];
         out = "downloaded-media/chat_" + chatId + "/" + response.getResult().getFile_path().split("/")[1].split("\\.")[0] + ".wav";
 
@@ -76,13 +78,17 @@ public class MediaHandler {
 
         double fileLength = mediaUtil.getAudioDuration(out);
 
-        if (fileLength < MIN_LENGTH) {
-            throw new FileTooShortException(languageUtil.getProperty("file.too.short"));
+        try {
+            if (fileLength < MIN_LENGTH) {
+                throw new FileTooShortException(languageUtil.getProperty("file.too.short"));
+            }else if (fileLength > MAX_LENGTH) {
+                throw new ExceedFileDurationException(languageUtil.getProperty("file.duration.exceeded"));
+            }
+        }catch (FileTooShortException | ExceedFileDurationException e) {
+            fileSystemUtil.deleteFile(in);
+            fileSystemUtil.deleteFile(out);
         }
 
-        if (fileLength > MAX_LENGTH) {
-
-        }
 
         File fileLink = googleDriveService.uploadFile(out, chatId);
         RecognizedSongResponse recognizedAudio = recognizeMediaService.recognizeAudio(fileLink.getWebViewLink());
