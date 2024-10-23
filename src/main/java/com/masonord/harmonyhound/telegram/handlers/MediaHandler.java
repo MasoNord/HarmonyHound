@@ -2,6 +2,7 @@ package com.masonord.harmonyhound.telegram.handlers;
 
 import com.google.api.services.drive.model.File;
 import com.google.gson.Gson;
+import com.masonord.harmonyhound.exception.ExceedFileSizeLimitException;
 import com.masonord.harmonyhound.exception.FileTooShortException;
 import com.masonord.harmonyhound.exception.SongNotFoundException;
 import com.masonord.harmonyhound.response.rapidapi.Metadata;
@@ -54,7 +55,7 @@ public class MediaHandler {
         this.languageUtil = new LanguageUtil();
     }
 
-    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, FileTooShortException, SongNotFoundException {
+    public BotApiMethod<?> answerMessage(Message message) throws IOException, InterruptedException, URISyntaxException, GeneralSecurityException, FileTooShortException, SongNotFoundException, ExceedFileSizeLimitException {
         String chatId = message.getChatId().toString();
         String in, out;
         FilePathResponse response;

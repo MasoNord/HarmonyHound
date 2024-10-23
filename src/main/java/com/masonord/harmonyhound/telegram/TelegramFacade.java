@@ -1,6 +1,6 @@
 package com.masonord.harmonyhound.telegram;
 
-import com.masonord.harmonyhound.exception.UnsupportedMediaType;
+import com.masonord.harmonyhound.exception.UnsupportedMediaTypeException;
 import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.service.UserService;
 import com.masonord.harmonyhound.telegram.handlers.CallbackQueryHandler;
@@ -64,7 +64,7 @@ public class TelegramFacade {
             }else if (message.hasVoice() || message.hasAudio() || message.hasVideo() || message.hasVideoNote()) {
                 return mediaHandler.answerMessage(message);
             }else {
-                throw new UnsupportedMediaType(languageUtil.getProperty("unsupported.media.type"));
+                throw new UnsupportedMediaTypeException(languageUtil.getProperty("unsupported.media.type"));
             }
         }
     }

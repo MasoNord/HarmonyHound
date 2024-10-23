@@ -1,6 +1,6 @@
 package com.masonord.harmonyhound.telegram.commands;
 
-import com.masonord.harmonyhound.exception.InvalidCommand;
+import com.masonord.harmonyhound.exception.InvalidCommandException;
 import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.util.LanguageUtil;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -26,7 +26,7 @@ public class CommandFactory {
         }else if(message.getText().equals("/info")) {
             command = new MyDataCommand(user);
         }else {
-            throw new InvalidCommand(languageUtil.getProperty("command.not.found"));
+            throw new InvalidCommandException(languageUtil.getProperty("command.not.found"));
         }
         return command;
     }
