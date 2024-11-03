@@ -27,10 +27,16 @@ public class UserServiceImpl implements UserService{
         user.setUsername(message.getChat().getUserName());
         user.setFirstName(message.getChat().getFirstName());
         user.setLastName(message.getChat().getLastName());
+        user.setLang("en-US");
         user.setApiCalls(0L);
 
         userRepository.save(user);
         return user;
+    }
+
+    @Transactional
+    public int updateUserLang(String lang, Long chatId) {
+        return userRepository.updateUserLang(chatId, lang);
     }
 
     @Transactional

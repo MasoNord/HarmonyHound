@@ -1,8 +1,11 @@
 package com.masonord.harmonyhound.util;
 
+import com.masonord.harmonyhound.model.User;
+import com.masonord.harmonyhound.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.util.Locale;
 
@@ -10,9 +13,14 @@ import java.util.Locale;
 public class LanguageUtilTest {
     LanguageUtil util;
 
+    @Mock
+    UserService userService;
+
     @BeforeEach
     void setUp() {
-        util = new LanguageUtil();
+        User user = new User();
+        user.setLang("en-US");
+        util = new LanguageUtil(user, userService);
     }
 
     @Test
