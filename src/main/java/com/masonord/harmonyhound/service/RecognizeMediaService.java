@@ -2,8 +2,7 @@ package com.masonord.harmonyhound.service;
 
 import com.google.gson.Gson;
 import com.masonord.harmonyhound.response.rapidapi.RecognizedSongResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import com.masonord.harmonyhound.util.EnvUtil;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,20 +11,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 // TODO: add java doc
 
-@Component
 public class RecognizeMediaService {
     private final String apikey;
     private final String rapidapi;
-    private final Gson gson;
 
-    public RecognizeMediaService(@Value("${shazam.api-key}") String apikey,
-                                 @Value("${rapid.api}") String rapidapi) {
-        this.apikey = apikey;
-        this.rapidapi = rapidapi;
-        this.gson = new Gson();
+    public RecognizeMediaService() {
+        this.apikey = EnvUtil.getValue("shazam.api-key");
+        this.rapidapi = EnvUtil.getValue("rapid.api");
     }
 
     public RecognizedSongResponse recognizeAudio(String fileLink) throws IOException, InterruptedException, URISyntaxException {
+        Gson gson = new Gson();
         URI uri = new URI("https://shazam-song-recognition-api.p.rapidapi.com/recognize/url?url=" + fileLink);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)

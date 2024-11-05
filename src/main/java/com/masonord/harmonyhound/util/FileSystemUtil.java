@@ -1,13 +1,11 @@
 package com.masonord.harmonyhound.util;
 
-import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 
 // TODO: change usage from classic IO to NIO to boost performance
 
-@Component
 public class FileSystemUtil {
 
     public void createNewFile(String destination) {

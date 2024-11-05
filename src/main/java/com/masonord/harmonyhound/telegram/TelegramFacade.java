@@ -1,15 +1,13 @@
 package com.masonord.harmonyhound.telegram;
 
-import com.masonord.harmonyhound.exception.UnsupportedMediaTypeException;
 import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.service.UserService;
 import com.masonord.harmonyhound.telegram.handlers.CallbackQueryHandler;
-import com.masonord.harmonyhound.telegram.handlers.MediaHandler;
 import com.masonord.harmonyhound.telegram.handlers.MessageHandler;
-import com.masonord.harmonyhound.util.LanguageUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -22,9 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TelegramFacade {
     public final static ConcurrentHashMap<Long, User> users = new ConcurrentHashMap<>();
     private final MessageHandler messageHandler;
-    private final MediaHandler mediaHandler;
     private final CallbackQueryHandler callbackQueryHandler;
-    private final LanguageUtil languageUtil;
+    private final String botToken;
 
     @Autowired
     private UserService userService;
@@ -35,13 +32,12 @@ public class TelegramFacade {
         userService.findAll().forEach(user -> TelegramFacade.users.put(user.getUserId(), user));
     }
 
-    public TelegramFacade(MessageHandler messageHandler,
-                       CallbackQueryHandler callbackQueryHandler,
-                       MediaHandler mediaHandler) {
+    public TelegramFacade(@Value("${telegram.bot-token}") String botToken,
+                          MessageHandler messageHandler,
+                          CallbackQueryHandler callbackQueryHandler) {
         this.messageHandler = messageHandler;
-        this.mediaHandler = mediaHandler;
         this.callbackQueryHandler = callbackQueryHandler;
-        this.languageUtil = new LanguageUtil();
+        this.botToken = botToken;
     }
 
     public BotApiMethod<?> handleUpdate(Update update) throws Exception {
@@ -56,17 +52,9 @@ public class TelegramFacade {
                 user = userService.addUser(message);
                 users.put(message.getChatId(), user);
             }
-
             user = users.get(message.getChatId());
 
-            if (message.hasText()) {
-                return messageHandler.answerMessage(message, user);
-            }else if (message.hasVoice() || message.hasAudio() || message.hasVideo() || message.hasVideoNote()) {
-                return mediaHandler.answerMessage(message);
-            }else {
-                throw new UnsupportedMediaTypeException(languageUtil.getProperty("unsupported.media.type"));
-            }
+            return messageHandler.answerMessage(userService, user, message, botToken);
         }
     }
-
 }

@@ -2,7 +2,9 @@ package com.masonord.harmonyhound.util;
 
 import com.google.gson.Gson;
 import com.masonord.harmonyhound.exception.ExceedFileSizeLimitException;
+import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.response.telegram.FilePathResponse;
+import com.masonord.harmonyhound.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,26 +18,23 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 
-@Component
 public class DownloadUtil {
     private final double MAX_FILE_SIZE = 10;
     private final String botToken;
-    private final LanguageUtil languageUtil;
     private final Gson gson;
+    private final FileSystemUtil fileSystemUtil;
+    private final LanguageUtil languageUtil;
 
-    @Autowired
-    FileSystemUtil fileSystemUtil;
-
-    public DownloadUtil(@Value("${telegram.bot-token}") String botToken) {
-        this.gson = new Gson();
+    public DownloadUtil(String botToken, LanguageUtil languageUtil) {
+        this.languageUtil = languageUtil;
         this.botToken = botToken;
-        this.languageUtil = new LanguageUtil();
+        this.gson = new Gson();
+        this.fileSystemUtil = new FileSystemUtil();
     }
 
     public FilePathResponse download(String fieldId, String chatId) throws URISyntaxException, IOException, InterruptedException, ExceedFileSizeLimitException {
         FilePathResponse filePathResponse = getFilePath(fieldId);
         double fileSizeInMB = (double) filePathResponse.getResult().getFile_size() / (1024 * 1024);
-        System.out.println(fileSizeInMB);
 
         if (fileSizeInMB > MAX_FILE_SIZE) {
             throw new ExceedFileSizeLimitException(languageUtil.getProperty("file.too.big"));

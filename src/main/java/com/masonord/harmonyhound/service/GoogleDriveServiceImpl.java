@@ -16,12 +16,10 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Permission;
-import org.springframework.stereotype.Service;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
-@Service
 public class GoogleDriveServiceImpl implements GoogleDriveService {
     private static final String APPLICATION_NAME = "Web client 1";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();

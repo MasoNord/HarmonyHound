@@ -1,5 +1,6 @@
 package com.masonord.harmonyhound.telegram.commands;
 
+import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.telegram.keyboards.KeyboardMaker;
 import com.masonord.harmonyhound.util.LanguageUtil;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -7,15 +8,15 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 public class ChangeLangCommand implements Command {
 
-    private final String chatId;
+    private final User user;
     private final String lang;
     private final LanguageUtil languageUtil;
     private final KeyboardMaker keyboardMaker;
 
-    public ChangeLangCommand(String chatId, String lang) {
-        this.chatId = chatId;
+    public ChangeLangCommand(User user, String lang, LanguageUtil languageUtil) {
+        this.user = user;
         this.lang = lang;
-        this.languageUtil = new LanguageUtil();
+        this.languageUtil = languageUtil;
         this.keyboardMaker = new KeyboardMaker(languageUtil);
     }
 
@@ -25,10 +26,10 @@ public class ChangeLangCommand implements Command {
 
         if (languageUtil.getLanguages().containsKey(lang)) {
             languageUtil.setLanguage(languageUtil.getLanguages().get(lang));
-            sendMessage = new SendMessage(chatId, languageUtil.getProperty("change.language"));
+            sendMessage = new SendMessage(String.valueOf(user.getUserId()), languageUtil.getProperty("change.language"));
             sendMessage.setReplyMarkup(keyboardMaker.getMainMenuKeyBoard());
         }else {
-            sendMessage = new SendMessage(chatId, languageUtil.getProperty("start"));
+            sendMessage = new SendMessage(String.valueOf(user.getUserId()), languageUtil.getProperty("start"));
             sendMessage.setReplyMarkup(keyboardMaker.getLanguageMenuKeyBoard());
         }
         sendMessage.enableMarkdown(true);

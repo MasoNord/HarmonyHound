@@ -8,9 +8,9 @@ public class PongCommand implements Command{
     private final String chatId;
     private final LanguageUtil languageUtil;
 
-    public PongCommand(String chatId) {
+    public PongCommand(String chatId, LanguageUtil languageUtil) {
         this.chatId = chatId;
-        this.languageUtil = new LanguageUtil();
+        this.languageUtil = languageUtil;
     }
 
     @Override

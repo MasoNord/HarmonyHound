@@ -1,7 +1,5 @@
 package com.masonord.harmonyhound.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -10,13 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 
-@Component
 public class MediaUtil {
     private final FileSystemUtil fileSystemUtil;
 
-    @Autowired
-    MediaUtil(FileSystemUtil fileSystemUtil) {
-        this.fileSystemUtil = fileSystemUtil;
+    public MediaUtil() {
+        this.fileSystemUtil = new FileSystemUtil();
     }
 
     public void convertFileToWav(String inFilename, String outFilename) {

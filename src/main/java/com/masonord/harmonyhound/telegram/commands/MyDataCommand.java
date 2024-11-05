@@ -10,9 +10,9 @@ public class MyDataCommand implements Command{
     private final User user;
     private final LanguageUtil languageUtil;
 
-    public MyDataCommand(User user) {
+    public MyDataCommand(User user, LanguageUtil languageUtil) {
         this.user = user;
-        this.languageUtil = new LanguageUtil();
+        this.languageUtil = languageUtil;
     }
 
     @Override
