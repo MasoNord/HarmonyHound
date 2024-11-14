@@ -13,5 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Modifying
     @Query (value = "UPDATE users SET lang = ?2 WHERE users.user_id = ?1", nativeQuery = true)
-    int updateUserLang(Long id, String lang);
+    void updateUserLang(Long id, String lang);
+
+    @Modifying
+    @Query(value = "UPDATE users SET api_calls = ?2 WHERE users.user_id = ?1", nativeQuery = true)
+    void updateUserApiCalls(Long id, Long apiCalls);
 }

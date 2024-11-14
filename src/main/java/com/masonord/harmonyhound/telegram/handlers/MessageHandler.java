@@ -15,7 +15,7 @@ public class MessageHandler {
                                          Message message,
                                          String botToken) throws Exception {
         LanguageUtil languageUtil = new LanguageUtil(user, userService);
-        CommandFactory commandFactory = new CommandFactory(languageUtil, user, message, botToken);
+        CommandFactory commandFactory = new CommandFactory(languageUtil, user, message, botToken, userService);
         return commandFactory.createCommand().execute();
     }
 }

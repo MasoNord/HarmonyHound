@@ -51,8 +51,9 @@ public class TelegramFacade {
             if (!users.containsKey(message.getChatId())) {
                 user = userService.addUser(message);
                 users.put(message.getChatId(), user);
+            }else {
+                user = userService.findByChatId(message.getChatId());
             }
-            user = users.get(message.getChatId());
 
             return messageHandler.answerMessage(userService, user, message, botToken);
         }

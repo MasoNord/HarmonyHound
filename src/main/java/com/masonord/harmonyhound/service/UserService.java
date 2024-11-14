@@ -7,6 +7,7 @@ import java.util.List;
 public interface UserService {
     User findByChatId(Long chatId);
     User addUser(Message message);
-    int updateUserLang(String lang, Long chatId);
+    void updateUserLang(String lang, Long chatId);
+    void updateUserApiCalls(Long chatId);
     List<User> findAll();
 }
