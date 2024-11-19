@@ -22,6 +22,7 @@ public class StartCommand implements Command{
     public BotApiMethod<?> execute() {
         SendMessage sendMessage = new SendMessage(String.valueOf(user.getUserId()), languageUtil.getProperty("start"));
         sendMessage.enableMarkdown(true);
+        keyboardMaker.getLanguageMenuKeyBoard().setOneTimeKeyboard(true);
         sendMessage.setReplyMarkup(keyboardMaker.getLanguageMenuKeyBoard());
         return sendMessage;
     }

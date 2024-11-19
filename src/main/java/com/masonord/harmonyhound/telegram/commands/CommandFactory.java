@@ -34,9 +34,10 @@ public class CommandFactory {
             }else if (message.getText().equals("/help")) {
                 command = new HelpCommand(user, languageUtil);
             }else if(message.getText().equals(languageUtil.getProperty("change.language.text"))
-                    || languageUtil.getLanguages().containsKey(message.getText())) {
+                    || languageUtil.getLanguages().containsKey(message.getText())
+                    || message.getText().equals("/language")) {
                 command = new ChangeLangCommand(user, message.getText(), languageUtil);
-            }else if(message.getText().equals("/info")) {
+            }else if(message.getText().equals("/data")) {
                 command = new MyDataCommand(user, languageUtil);
             }else {
                 throw new InvalidCommandException(languageUtil.getProperty("command.not.found"));
