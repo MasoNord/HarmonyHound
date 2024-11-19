@@ -35,8 +35,15 @@ public class UserServiceImpl implements UserService{
     }
 
     @Transactional
-    public int updateUserLang(String lang, Long chatId) {
-        return userRepository.updateUserLang(chatId, lang);
+    public void updateUserLang(String lang, Long chatId) {
+        userRepository.updateUserLang(chatId, lang);
+    }
+
+    @Transactional
+    public void updateUserApiCalls(Long chatId) {
+        User user = userRepository.findByUserId(chatId);
+        long apiCalls = user.getApiCalls() + 1;
+        userRepository.updateUserApiCalls(chatId, apiCalls);
     }
 
     @Transactional

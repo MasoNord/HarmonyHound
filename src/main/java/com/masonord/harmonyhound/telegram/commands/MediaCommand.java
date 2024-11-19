@@ -1,7 +1,6 @@
 package com.masonord.harmonyhound.telegram.commands;
 
 import com.google.api.services.drive.model.File;
-import com.google.gson.Gson;
 import com.masonord.harmonyhound.exception.ExceedFileDurationException;
 import com.masonord.harmonyhound.exception.ExceedFileSizeLimitException;
 import com.masonord.harmonyhound.exception.FileTooShortException;
@@ -11,9 +10,7 @@ import com.masonord.harmonyhound.response.rapidapi.Metapages;
 import com.masonord.harmonyhound.response.rapidapi.Sections;
 import com.masonord.harmonyhound.response.telegram.FilePathResponse;
 import com.masonord.harmonyhound.response.rapidapi.RecognizedSongResponse;
-import com.masonord.harmonyhound.service.GoogleDriveService;
-import com.masonord.harmonyhound.service.GoogleDriveServiceImpl;
-import com.masonord.harmonyhound.service.RecognizeMediaService;
+import com.masonord.harmonyhound.service.*;
 import com.masonord.harmonyhound.util.DownloadUtil;
 import com.masonord.harmonyhound.util.FileSystemUtil;
 import com.masonord.harmonyhound.util.LanguageUtil;
@@ -38,17 +35,20 @@ public class MediaCommand implements Command {
     private final MediaUtil mediaUtil;
     private final Message message;
     private final LanguageUtil languageUtil;
+    private final UserService userService;
 
     public MediaCommand(String botToken,
                         LanguageUtil languageUtil,
-                        Message message) {
-        this.downloadUtil = new DownloadUtil(botToken, languageUtil);
+                        Message message,
+                        UserService userService) {
         this.message = message;
         this.languageUtil = languageUtil;
+        this.userService = userService;
         this.googleDriveService = new GoogleDriveServiceImpl();
         this.recognizeMediaService = new RecognizeMediaService();
         this.fileSystemUtil = new FileSystemUtil();
         this.mediaUtil = new MediaUtil();
+        this.downloadUtil = new DownloadUtil(botToken, languageUtil);
     }
 
     @Override
@@ -84,13 +84,15 @@ public class MediaCommand implements Command {
             fileSystemUtil.deleteFile(in);
             fileSystemUtil.deleteFile(out);
             throw new RuntimeException(e.getMessage());
-        } 
+        }
 
         File fileLink = googleDriveService.uploadFile(out, chatId);
         RecognizedSongResponse recognizedAudio = recognizeMediaService.recognizeAudio(fileLink.getWebViewLink());
         googleDriveService.deleteFile(fileLink.getId());
         fileSystemUtil.deleteFile(in);
         fileSystemUtil.deleteFile(out);
+
+        userService.updateUserApiCalls(Long.valueOf(chatId));
 
         if (Objects.isNull(recognizedAudio.getTrack()) || recognizedAudio.getMatches().isEmpty()) {
             throw new SongNotFoundException(languageUtil.getProperty("song.not.found"));
