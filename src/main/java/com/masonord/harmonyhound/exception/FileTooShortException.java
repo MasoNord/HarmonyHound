@@ -5,7 +5,4 @@ public class FileTooShortException extends Exception{
         super(message);
     }
 
-    public FileTooShortException(Throwable e, String message) {
-        super(message, e);
-    }
 }

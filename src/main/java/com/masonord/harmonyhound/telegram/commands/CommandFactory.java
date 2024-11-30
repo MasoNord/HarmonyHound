@@ -5,9 +5,13 @@ import com.masonord.harmonyhound.exception.UnsupportedMediaTypeException;
 import com.masonord.harmonyhound.model.User;
 import com.masonord.harmonyhound.service.UserService;
 import com.masonord.harmonyhound.util.LanguageUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+
 public class CommandFactory {
+    private final static Logger LOGGER = LoggerFactory.getLogger(CommandFactory.class);
     private final LanguageUtil languageUtil;
     private final User user;
     private final Message message;
@@ -40,11 +44,20 @@ public class CommandFactory {
             }else if(message.getText().equals("/data")) {
                 command = new MyDataCommand(user, languageUtil);
             }else {
+                LOGGER
+                    .atWarn()
+                    .setMessage("Wrong command has been received: {}")
+                    .addArgument(message.getText())
+                    .log();
                 throw new InvalidCommandException(languageUtil.getProperty("command.not.found"));
             }
         }else if (message.hasVoice() || message.hasAudio() || message.hasVideo() || message.hasVideoNote()){
             command = new MediaCommand(botToken, languageUtil, message, userService);
         }else {
+            LOGGER
+                .atWarn()
+                .setMessage("Wrong median type has been received")
+                .log();
             throw new UnsupportedMediaTypeException(languageUtil.getProperty("unsupported.media.type"));
         }
         return command;
