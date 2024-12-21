@@ -16,11 +16,14 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Permission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
 public class GoogleDriveServiceImpl implements GoogleDriveService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleDriveServiceImpl.class);
     private static final String APPLICATION_NAME = "Web client 1";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "/home/masonord/credentials";
@@ -50,8 +53,9 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
                     .setFields("id, webViewLink, webContentLink")
                     .execute();
         }catch (GoogleJsonResponseException e) {
-            System.out.println("Something went wrong" + e.getDetails());
+            LOGGER.atError().setMessage(e.getMessage()).log();
         }
+        LOGGER.atInfo().setMessage("The file has been uploaded to google drive successfully").log();
         return fileLink;
     }
 
@@ -62,11 +66,25 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         service.files().delete(fileId).execute();
+        LOGGER.atInfo().setMessage("The file has been removed from google drive successfully").log();
     }
+
+    /**
+     * Create a credential file at CREDENTIALS_FILE_PATH
+     * Which is required by Google Drive api in order to upload/delete files from it
+     *
+     * For more information check the official documentation
+     * <a href="https://developers.google.com/drive/api/quickstart/java">...</a>
+     *
+     * @param HTTP_TRANSPORT
+     * @return
+     * @throws IOException
+     */
 
     private Credential getCredential(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         InputStream in = GoogleDriveServiceImpl.class.getClassLoader().getResource(CREDENTIALS_FILE_PATH).openStream();
         if (in == null) {
+            LOGGER.atError().setMessage("Resource not found: " + CREDENTIALS_FILE_PATH).log();
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
 
@@ -78,7 +96,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
                 .build();
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8080).build();
+        LOGGER.atDebug().setMessage("The credentials has been loaded successfully at {}").addArgument(CREDENTIALS_FILE_PATH).log();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
-
 }

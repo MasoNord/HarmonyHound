@@ -15,6 +15,8 @@ import com.masonord.harmonyhound.util.DownloadUtil;
 import com.masonord.harmonyhound.util.FileSystemUtil;
 import com.masonord.harmonyhound.util.LanguageUtil;
 import com.masonord.harmonyhound.util.MediaUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class MediaCommand implements Command {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MediaCommand.class);
     private final double MIN_LENGTH = 3.00;
     private final double MAX_LENGTH = 15.00;
 
@@ -71,13 +74,36 @@ public class MediaCommand implements Command {
         out = "downloaded-media/chat_" + chatId + "/" + response.getResult().getFile_path().split("/")[1].split("\\.")[0] + ".wav";
 
         mediaUtil.convertFileToWav(in, out);
-
         double fileLength = mediaUtil.getAudioDuration(out);
 
+        LOGGER
+                .atDebug()
+                .setMessage(
+                """
+                    chatId: {}\
+                    input file: {}\
+                    output file: {}
+                """)
+                .addArgument(chatId)
+                .addArgument(in)
+                .addArgument(out)
+                .log();
         try {
             if (fileLength < MIN_LENGTH) {
+                LOGGER
+                    .atError()
+                    .setMessage("The file length is too small: {} smaller than {}")
+                    .addArgument(fileLength)
+                    .addArgument(MIN_LENGTH)
+                    .log();
                 throw new FileTooShortException(languageUtil.getProperty("file.too.short"));
             }else if (fileLength > MAX_LENGTH) {
+                LOGGER
+                        .atError()
+                        .setMessage("Exceeded the allowed file length limit: {} bigger than {}")
+                        .addArgument(fileLength)
+                        .addArgument(MAX_LENGTH)
+                        .log();
                 throw new ExceedFileDurationException(languageUtil.getProperty("file.duration.exceeded"));
             }
         } catch (ExceedFileDurationException | FileTooShortException e) {
@@ -95,9 +121,15 @@ public class MediaCommand implements Command {
         userService.updateUserApiCalls(Long.valueOf(chatId));
 
         if (Objects.isNull(recognizedAudio.getTrack()) || recognizedAudio.getMatches().isEmpty()) {
+            LOGGER.atError().setMessage("The song has not been found").log();
             throw new SongNotFoundException(languageUtil.getProperty("song.not.found"));
         }
 
+        LOGGER
+            .atInfo()
+            .setMessage("The song {} has been found successfully")
+            .addArgument(recognizedAudio.getTrack().getTitle())
+            .log();
         return getSendMessage(chatId, recognizedAudio);
     }
 
@@ -120,6 +152,7 @@ public class MediaCommand implements Command {
                         (Objects.isNull(metadata) ? "" : "Released: " + metadata.get(2).getText()  + '\n') +
                         "*Shazam: *" + recognizedAudio.getTrack().getUrl() + "\n"
         );
+
         return sendMessage;
     }
 }

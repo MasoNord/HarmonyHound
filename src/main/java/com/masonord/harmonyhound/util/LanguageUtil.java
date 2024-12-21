@@ -8,6 +8,12 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * LanguageUtil class is responsible for changing current user interface's language
+ *
+ */
+
+
 @Getter
 public class LanguageUtil {
     private final ConcurrentHashMap<String, String> languages = new ConcurrentHashMap<>();
