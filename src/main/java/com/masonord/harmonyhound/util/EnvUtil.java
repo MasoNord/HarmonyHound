@@ -8,6 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+
+/**
+ * It's a hand-made class to read properties from an application property file
+ *
+ */
+
 public class EnvUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvUtil.class);
 

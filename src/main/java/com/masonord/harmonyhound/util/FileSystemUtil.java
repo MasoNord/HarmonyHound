@@ -9,6 +9,10 @@ import java.nio.file.FileAlreadyExistsException;
 
 // TODO: change usage from classic IO to NIO to boost performance
 
+/**
+ * FileSystemUtil is responsible for creating or deleting files or folders
+ *
+ */
 public class FileSystemUtil {
     private final static Logger LOGGER = LoggerFactory.getLogger(FileSystemUtil.class);
 

@@ -15,6 +15,12 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 
+/**
+ * DownloadUtil class is made to download files from a telegram server
+ * <p>
+ * For more information how it works, please visit the official documentation
+ * <a href="https://core.telegram.org/api/files#downloading-files">...</a>
+ */
 public class DownloadUtil {
     private final static Logger LOGGER = LoggerFactory.getLogger(DownloadUtil.class);
     private final double MAX_FILE_SIZE = 10;

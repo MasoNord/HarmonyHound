@@ -11,6 +11,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 
+/**
+ * MediaUtil class is made to work with audio files
+ * <p>
+ * specifically for converting them and calculating their durations
+ *
+ */
+
+
 public class MediaUtil {
     public final static Logger LOGGER = LoggerFactory.getLogger(MediaUtil.class);
     private final FileSystemUtil fileSystemUtil;

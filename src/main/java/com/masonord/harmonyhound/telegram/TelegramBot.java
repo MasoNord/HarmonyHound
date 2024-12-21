@@ -29,13 +29,16 @@ public class TelegramBot extends SpringWebhookBot {
         this.telegramFacade = telegramFacade;
     }
 
+
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         try {
+
             SendChatAction sendChatAction = new SendChatAction();
             sendChatAction.setAction(ActionType.TYPING);
             sendChatAction.setChatId(String.valueOf(update.getMessage().getChatId()));
             execute(sendChatAction);
+
             return telegramFacade.handleUpdate(update);
         }catch (IllegalAccessError e) {
             LOGGER.atError().setMessage(e.getMessage()).log();

@@ -18,7 +18,6 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -70,6 +69,18 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
         LOGGER.atInfo().setMessage("The file has been removed from google drive successfully").log();
     }
 
+    /**
+     * Create a credential file at CREDENTIALS_FILE_PATH
+     * Which is required by Google Drive api in order to upload/delete files from it
+     *
+     * For more information check the official documentation
+     * <a href="https://developers.google.com/drive/api/quickstart/java">...</a>
+     *
+     * @param HTTP_TRANSPORT
+     * @return
+     * @throws IOException
+     */
+
     private Credential getCredential(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         InputStream in = GoogleDriveServiceImpl.class.getClassLoader().getResource(CREDENTIALS_FILE_PATH).openStream();
         if (in == null) {
@@ -88,5 +99,4 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
         LOGGER.atDebug().setMessage("The credentials has been loaded successfully at {}").addArgument(CREDENTIALS_FILE_PATH).log();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
-
 }

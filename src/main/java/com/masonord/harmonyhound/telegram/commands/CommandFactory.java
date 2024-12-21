@@ -30,6 +30,12 @@ public class CommandFactory {
         this.userService = userService;
     }
 
+    /**
+     * The method responsible for choosing which command send on execution
+     *
+     * @return
+     * @throws Exception
+     */
     public Command createCommand() throws Exception {
         Command command;
         if (message.hasText()) {

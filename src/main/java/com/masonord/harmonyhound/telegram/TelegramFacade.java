@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class TelegramFacade {
+
+    // local cache for storing users
     public final static ConcurrentHashMap<Long, User> users = new ConcurrentHashMap<>();
     public final static Logger LOGGER = LoggerFactory.getLogger(TelegramFacade.class);
     private final MessageHandler messageHandler;
@@ -44,6 +46,14 @@ public class TelegramFacade {
         this.botToken = botToken;
     }
 
+    /**
+     * Implementation of Telegram API method
+     * The following method receives updates with callback and normal messages
+     *
+     * @param update
+     * @return
+     */
+
     public BotApiMethod<?> handleUpdate(Update update) throws Exception {
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
@@ -52,6 +62,7 @@ public class TelegramFacade {
             Message message = update.getMessage();
             User user;
 
+            // check if the current users exists in the cache
             if (!users.containsKey(message.getChatId())) {
                 user = userService.addUser(message);
                 users.put(message.getChatId(), user);
